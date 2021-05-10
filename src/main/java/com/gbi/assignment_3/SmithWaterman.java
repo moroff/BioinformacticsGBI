@@ -17,23 +17,62 @@ public class SmithWaterman {
     String x;
     String y;
 
+    /**
+     * Result structure of alignment
+     */
     public static class Score {
-        public int i = -1;
-        public int j = -1;
+        /**
+         * row of highest score.
+         */
+        public int row = -1;
+        /**
+         * column of highest score.
+         */
+        public int col = -1;
+        /**
+         * highest score
+         */
         public int score = 0;
     }
 
+    /**
+     * Trace directions
+     */
     public enum TbDirection {
-        Diagonal,
-        Left,
-        Above,
-        Undefined
+        Diagonal("D"),
+        Left("L"),
+        Above("A"),
+        Undefined("x");
+
+        private final String direction;
+
+        TbDirection(String direction) {
+            this.direction = direction;
+        }
+
+        public String toString() {
+            return direction;
+        }
     }
 
-    //Calculation syntax for the edit distance scores
-    private int max(int a, int b, int c) {
-        return Math.max(0, (Math.max(Math.max(a, b), c)));
+    /**
+     * Calculate maximum score value from diagonal, left  or above
+     * @param diagonal (i-1,j-1)
+     * @param left (i,j-1)
+     * @param above (i-1,j)
+     * @return
+     */
+    private int max(int diagonal, int left, int above) {
+        return Math.max(0, (Math.max(Math.max(diagonal, left), above)));
     }
+
+    /**
+     * Determine direction causing the maximum score, see {@link #max(int, int, int)}
+     * @param diagonal
+     * @param above
+     * @param left
+     * @return
+     */
     private TbDirection maxDirection(int diagonal, int left, int above) {
         if (diagonal == max(diagonal, left, above)) {
             return TbDirection.Diagonal;
@@ -49,8 +88,8 @@ public class SmithWaterman {
     /**
      * Computes the edit distance between two sequences using dynamic programming
      *
-     * @param x             first sequence
-     * @param y             second sequence
+     * @param x             first sequence (vertical, mapped to rows in matrix)
+     * @param y             second sequence (horizontal, mapped to columns in matrix)
      * @param matchScore    match score
      * @param mismatchScore mismatch score
      * @param gapPenalty    gap penalty
@@ -60,16 +99,19 @@ public class SmithWaterman {
         this.x = x;
         this.y = y;
         Score score = new Score();
-        //Edit distance matrix length initialisation
+
+        // Matrix [rows][columns]
         edMatrix = new int[x.length() + 1][y.length() + 1];
         tbMatrix = new TbDirection[x.length() + 1][y.length() + 1];
 
         //Initialisation
         for (int i = 0; i <= x.length(); ++i) {
             edMatrix[i][0] = 0;
+            tbMatrix[i][0] = TbDirection.Undefined;
         }
         for (int j = 0; j <= y.length(); ++j) {
             edMatrix[0][j] = 0;
+            tbMatrix[0][j] = TbDirection.Undefined;
         }
 
         //Calculate scores
@@ -84,8 +126,8 @@ public class SmithWaterman {
                 }
                 if (edMatrix[i][j] > score.score) {
                     score.score = edMatrix[i][j];
-                    score.i = i;
-                    score.j = j;
+                    score.row = i;
+                    score.col = j;
                 }
             }
         }
@@ -103,7 +145,7 @@ public class SmithWaterman {
         StringBuilder yAligned = new StringBuilder();
 
         //Traceback through edit distance matrix & alignment of chars for each sequence
-        for (int i = score.i, j = score.j; i > 0 && j > 0; ) {
+        for (int i = score.row, j = score.col; i > 0 && j > 0; ) {
             if (edMatrix[i][j] == 0) {
                 break;
             }
@@ -117,12 +159,12 @@ public class SmithWaterman {
                 case Left:
                     xAligned.insert(0,x.charAt(i-1));
                     yAligned.insert(0,"-");
-                    --i;
+                    --j;
                     break;
                 case Above:
                     xAligned.insert(0,"-");
                     yAligned.insert(0,y.charAt(j-1));
-                    --j;
+                    --i;
                     break;
                 case Undefined:
                     xAligned.insert(0,"@");
@@ -136,6 +178,46 @@ public class SmithWaterman {
         System.out.println(yAligned.toString());
         return xAligned.toString() + ':' + yAligned.toString();
 
+    }
+
+    public void printScoreMatrix() {
+
+        // Print header
+        System.out.print(";");
+        for (int j = 0; j < y.length(); j++) {
+            System.out.print(";"+y.charAt(j));
+        }
+        System.out.println("");
+
+        // Print lines
+            for (int i = 0; i <= x.length(); i++) {
+                System.out.print(i > 0 ? x.charAt(i-1) : "");
+                for (int j = 0; j <= y.length(); j++) {
+                    System.out.print(";");
+                    System.out.print(edMatrix[i][j]);
+                }
+                System.out.println("");
+        }
+    }
+
+    public void printTraceMatrix() {
+
+        // Print header
+        System.out.print(";");
+        for (int j = 0; j < y.length(); j++) {
+            System.out.print(";"+y.charAt(j));
+        }
+        System.out.println("");
+
+        // Print lines
+        for (int i = 0; i <= x.length(); i++) {
+            System.out.print(i > 0 ? x.charAt(i-1) : "");
+            for (int j = 0; j <= y.length(); j++) {
+                System.out.print(";");
+                System.out.print(tbMatrix[i][j]);
+            }
+            System.out.println("");
+        }
     }
 
     /**
