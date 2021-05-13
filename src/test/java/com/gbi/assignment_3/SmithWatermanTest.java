@@ -14,11 +14,6 @@ public class SmithWatermanTest {
         System.out.println("i (row):"+score.row);
         System.out.println("j (col):"+score.col);
 
-        System.out.println("Scores:");
-        smithWaterman.printScoreMatrix();
-        System.out.println("Traces:");
-        smithWaterman.printTraceMatrix();
-
         String[] trace = smithWaterman.traceBackAndShowAlignment(score);
 
         // Assertions
@@ -37,10 +32,6 @@ public class SmithWatermanTest {
         System.out.println("i (row):"+score.row);
         System.out.println("j (col):"+score.col);
 
-        System.out.println("Scores:");
-        smithWaterman.printScoreMatrix();
-        System.out.println("Traces:");
-        smithWaterman.printTraceMatrix();
 
         String[] trace = smithWaterman.traceBackAndShowAlignment(score);
 
@@ -60,11 +51,6 @@ public class SmithWatermanTest {
         System.out.println("i (row):"+score.row);
         System.out.println("j (col):"+score.col);
 
-        System.out.println("Scores:");
-        smithWaterman.printScoreMatrix();
-        System.out.println("Traces:");
-        smithWaterman.printTraceMatrix();
-
         String[] trace = smithWaterman.traceBackAndShowAlignment(score);
 
         // Assertions
@@ -82,11 +68,6 @@ public class SmithWatermanTest {
         System.out.println("score:"+score.score);
         System.out.println("i (row):"+score.row);
         System.out.println("j (col):"+score.col);
-
-        System.out.println("Scores:");
-        smithWaterman.printScoreMatrix();
-        System.out.println("Traces:");
-        smithWaterman.printTraceMatrix();
 
         String[] trace = smithWaterman.traceBackAndShowAlignment(score);
 

@@ -14,6 +14,12 @@ public class SmithWaterman {
     TbDirection[][] tbMatrix;
     String x;
     String y;
+    int matchCount = 0;
+    int mismatchCount = 0;
+    int gapCountX = 0;
+    int gapCountY = 0;
+    int firstMatchX = 0;
+    int firstMatchY = 0;
 
     /**
      * Result structure of alignment
@@ -151,6 +157,12 @@ public class SmithWaterman {
                 case Diagonal:
                     xAligned.insert(0,x.charAt(i-1));
                     yAligned.insert(0,y.charAt(j-1));
+                    if (x.charAt(i - 1) == y.charAt(j - 1)) {
+                        ++matchCount;
+                    }
+                    else {
+                        ++mismatchCount;
+                    }
                     --i;
                     --j;
                     break;
@@ -158,17 +170,21 @@ public class SmithWaterman {
                     xAligned.insert(0,"-");
                     yAligned.insert(0,y.charAt(j-1));
                     --j;
+                    ++gapCountX;
                     break;
                 case Above:
                     xAligned.insert(0,x.charAt(i-1));
                     yAligned.insert(0,"-");
                     --i;
+                    ++gapCountY;
                     break;
                 case Undefined:
                     xAligned.insert(0,"@");
                     yAligned.insert(0,"@");
             }
         }
+        firstMatchX = score.row - (matchCount + mismatchCount + gapCountY);
+        firstMatchY = score.col - (matchCount + mismatchCount + gapCountX);
 
 
         // Print optimal alignment of x and y to console in correct order
@@ -177,46 +193,6 @@ public class SmithWaterman {
         return new String[] {
                 xAligned.toString(), yAligned.toString()
         };
-    }
-
-    public void printScoreMatrix() {
-
-        // Print header
-        System.out.print(";");
-        for (int j = 0; j < y.length(); j++) {
-            System.out.print(";"+y.charAt(j));
-        }
-        System.out.println("");
-
-        // Print lines
-            for (int i = 0; i <= x.length(); i++) {
-                System.out.print(i > 0 ? x.charAt(i-1) : "");
-                for (int j = 0; j <= y.length(); j++) {
-                    System.out.print(";");
-                    System.out.print(edMatrix[i][j]);
-                }
-                System.out.println("");
-        }
-    }
-
-    public void printTraceMatrix() {
-
-        // Print header
-        System.out.print(";");
-        for (int j = 0; j < y.length(); j++) {
-            System.out.print(";"+y.charAt(j));
-        }
-        System.out.println("");
-
-        // Print lines
-        for (int i = 0; i <= x.length(); i++) {
-            System.out.print(i > 0 ? x.charAt(i-1) : "");
-            for (int j = 0; j <= y.length(); j++) {
-                System.out.print(";");
-                System.out.print(tbMatrix[i][j]);
-            }
-            System.out.println("");
-        }
     }
 
     /**
@@ -249,7 +225,9 @@ public class SmithWaterman {
         reader.close();
 
         SmithWaterman smithWaterman = new SmithWaterman();
-        Score score = smithWaterman.align(fastA.getSequence(0), fastA.getSequence(1),matchScore,mismatchScore,gapPenalty);
+        String sequence1 = fastA.getSequence(0);
+        String sequence2 = fastA.getSequence(1);
+        Score score = smithWaterman.align(sequence1, fastA.getSequence(1),matchScore,mismatchScore,gapPenalty);
 
         String[] alignedSeq = smithWaterman.traceBackAndShowAlignment(score);
         System.out.println("The optimal alignment score is "+ score.score);
@@ -257,8 +235,32 @@ public class SmithWaterman {
         Writer writer = new FileWriter(args[4]);
 
         writer.append("match score: " + matchScore + ", mismatch score: " + mismatchScore + ", gap penalty: " + gapPenalty).append('\n');
-        writer.append(alignedSeq[0]).append('\n');
 
+        writer.append("match count: " + smithWaterman.matchCount).//
+                append(", mismatch count: " + smithWaterman.mismatchCount).//
+                append(", gap count: " + (smithWaterman.gapCountX+ smithWaterman.gapCountY)).append('\n');
+        writer.append("Alignment in Sequence 1 starts at: " + smithWaterman.firstMatchX).//
+                append( " with length: " + (score.row - smithWaterman.firstMatchX)).//
+                append(" and gap count: " + smithWaterman.gapCountX).append('\n');
+        writer.append("Alignment in Sequence 2 starts at: " + smithWaterman.firstMatchY).//
+                append( " with length: " + (score.col - smithWaterman.firstMatchY)).//
+                append(" and gap count: " + smithWaterman.gapCountY).append('\n');
+
+        for (int i = 0; i < smithWaterman.firstMatchY; i++) {
+            writer.append(" ");
+        }
+        for (int i = 0; i < smithWaterman.firstMatchX; i++) {
+            writer.append(sequence1.charAt(i));
+        }
+        writer.append(alignedSeq[0]);
+        for (int i = score.row; i < sequence1.length(); i++) {
+            writer.append(sequence1.charAt(i));
+        }
+        writer.append('\n');
+
+        for (int i = 0; i < Math.max(smithWaterman.firstMatchX, smithWaterman.firstMatchY); i++) {
+            writer.append(" ");
+        }
         for (int i = 0; i < alignedSeq[0].length(); i++) {
             if (alignedSeq[0].charAt(i) == alignedSeq[1].charAt(i)) {
                 writer.append('|');
@@ -270,7 +272,18 @@ public class SmithWaterman {
                 writer.append(' ');
             }
         }
-        writer.write(alignedSeq[1]);
+        writer.append('\n');
+
+        for (int i = 0; i < smithWaterman.firstMatchX; i++) {
+            writer.append(" ");
+        }
+        for (int i = 0; i < smithWaterman.firstMatchY; i++) {
+            writer.append(sequence2.charAt(i));
+        }
+        writer.append(alignedSeq[1]);
+        for (int i = score.row; i < sequence2.length(); i++) {
+            writer.append(sequence2.charAt(i));
+        }
 
         writer.close();
 
