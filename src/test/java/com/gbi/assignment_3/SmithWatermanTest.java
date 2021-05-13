@@ -19,13 +19,35 @@ public class SmithWatermanTest {
         System.out.println("Traces:");
         smithWaterman.printTraceMatrix();
 
-        String trace = smithWaterman.traceBackAndShowAlignment(score);
+        String[] trace = smithWaterman.traceBackAndShowAlignment(score);
 
         // Assertions
         assertEquals(13,score.score);
         assertEquals(7,score.row);
         assertEquals(6,score.col);
-        assertEquals("GTT-AC:GTTGAC",trace);
+    }
+
+    @Test
+    public void testAlignMultiple() {
+        SmithWaterman smithWaterman = new SmithWaterman();
+
+        // Tests
+        SmithWaterman.Score score = smithWaterman.align("ABCDEABCDEABCDE", "ABCD",3, -3,2);
+        System.out.println("score:"+score.score);
+        System.out.println("i (row):"+score.row);
+        System.out.println("j (col):"+score.col);
+
+        System.out.println("Scores:");
+        smithWaterman.printScoreMatrix();
+        System.out.println("Traces:");
+        smithWaterman.printTraceMatrix();
+
+        String[] trace = smithWaterman.traceBackAndShowAlignment(score);
+
+        // Assertions
+        assertEquals(12,score.score);
+        assertEquals(4,score.row);
+        assertEquals(4,score.col);
     }
 
     @Test
@@ -43,13 +65,12 @@ public class SmithWatermanTest {
         System.out.println("Traces:");
         smithWaterman.printTraceMatrix();
 
-        String trace = smithWaterman.traceBackAndShowAlignment(score);
+        String[] trace = smithWaterman.traceBackAndShowAlignment(score);
 
         // Assertions
         assertEquals(27,score.score);
         assertEquals(9,score.row);
         assertEquals(9,score.col);
-        assertEquals("GGTTGACTA:GGTTGACTA",trace);
     }
 
     @Test
@@ -67,13 +88,12 @@ public class SmithWatermanTest {
         System.out.println("Traces:");
         smithWaterman.printTraceMatrix();
 
-        String trace = smithWaterman.traceBackAndShowAlignment(score);
+        String[] trace = smithWaterman.traceBackAndShowAlignment(score);
 
         // Assertions
         assertEquals(0,score.score);
         assertEquals(-1,score.row);
         assertEquals(-1,score.col);
-        assertEquals(":",trace);
     }
 
 }

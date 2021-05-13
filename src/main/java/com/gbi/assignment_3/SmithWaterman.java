@@ -2,9 +2,7 @@ package com.gbi.assignment_3;
 
 import com.gbi.FastA;
 
-import java.io.BufferedReader;
-        import java.io.FileReader;
-        import java.io.IOException;
+import java.io.*;
 
 /**
  * Compute edit distance using dynamic programming
@@ -139,7 +137,7 @@ public class SmithWaterman {
     /**
      * perform traceback and print an optimal alignment to  the console (standard output)
      */
-    public String traceBackAndShowAlignment(Score score) {
+    public String[] traceBackAndShowAlignment(Score score) {
         int diagonalCondition;
         StringBuilder xAligned = new StringBuilder();
         StringBuilder yAligned = new StringBuilder();
@@ -157,13 +155,13 @@ public class SmithWaterman {
                     --j;
                     break;
                 case Left:
-                    xAligned.insert(0,x.charAt(i-1));
-                    yAligned.insert(0,"-");
+                    xAligned.insert(0,"-");
+                    yAligned.insert(0,y.charAt(j-1));
                     --j;
                     break;
                 case Above:
-                    xAligned.insert(0,"-");
-                    yAligned.insert(0,y.charAt(j-1));
+                    xAligned.insert(0,x.charAt(i-1));
+                    yAligned.insert(0,"-");
                     --i;
                     break;
                 case Undefined:
@@ -176,8 +174,9 @@ public class SmithWaterman {
         // Print optimal alignment of x and y to console in correct order
         System.out.println(xAligned.toString());
         System.out.println(yAligned.toString());
-        return xAligned.toString() + ':' + yAligned.toString();
-
+        return new String[] {
+                xAligned.toString(), yAligned.toString()
+        };
     }
 
     public void printScoreMatrix() {
@@ -228,8 +227,18 @@ public class SmithWaterman {
     public static void main(String[] args) throws IOException {
         System.out.println("Friederike Moroff, Gwendolyn Gusak");
 
-        if (args.length != 1)
-            throw new IOException("Usage: EditDistanceDP fileName");
+        int matchScore = 3;
+        int mismatchScore = -3;
+        int gapPenalty = 5;
+
+        if (args.length != 5)
+            throw new IOException("Usage: SmithWatermanDP inputFileName matchScore mismatchScore gapPenalty outputFileName");
+
+        if (args.length == 4) {
+            matchScore = Integer.parseInt(args[1]);
+            mismatchScore = Integer.parseInt(args[2]);
+            gapPenalty = Integer.parseInt(args[3]);
+        }
 
         String fileName = args[0];
         System.out.println("Currently working on file:" + fileName);
@@ -238,6 +247,32 @@ public class SmithWaterman {
         FastA fastA = new FastA();
         fastA.read(reader);
         reader.close();
+
+        SmithWaterman smithWaterman = new SmithWaterman();
+        Score score = smithWaterman.align(fastA.getSequence(0), fastA.getSequence(1),matchScore,mismatchScore,gapPenalty);
+
+        String[] alignedSeq = smithWaterman.traceBackAndShowAlignment(score);
+        System.out.println("The optimal alignment score is "+ score.score);
+
+        Writer writer = new FileWriter(args[4]);
+
+        writer.append("match score: " + matchScore + ", mismatch score: " + mismatchScore + ", gap penalty: " + gapPenalty).append('\n');
+        writer.append(alignedSeq[0]).append('\n');
+
+        for (int i = 0; i < alignedSeq[0].length(); i++) {
+            if (alignedSeq[0].charAt(i) == alignedSeq[1].charAt(i)) {
+                writer.append('|');
+            }
+            else if (alignedSeq[0].charAt(i) != '-' && alignedSeq[1].charAt(i) != '-') {
+                writer.append('.');
+            }
+            else {
+                writer.append(' ');
+            }
+        }
+        writer.write(alignedSeq[1]);
+
+        writer.close();
 
     }
 }
