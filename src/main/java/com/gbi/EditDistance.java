@@ -58,7 +58,8 @@ public class EditDistance {
     public static void main(String[] args) throws IOException {
         System.out.println("YOUR_NAME_HERE_PLEASE");  // Hallo
 
-        if (args.length != 1)  // zweite änderung, aber hallo test blabla
+        if (args.length != 1)  // zweite änderung, aber hallo test, so geht das aber nicht
+
             throw new IOException("Usage: EditDistanceDP fileName");
 
         String fileName = args[0];
