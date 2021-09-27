@@ -56,9 +56,9 @@ public class EditDistance {
      * @param args commandline arguments
      */
     public static void main(String[] args) throws IOException {
-        System.out.println("YOUR_NAME_HERE_PLEASE");  // Hallo 
+        System.out.println("YOUR_NAME_HERE_PLEASE");  // Hallo
 
-        if (args.length != 1)
+        if (args.length != 1)  // zweite änderung
             throw new IOException("Usage: EditDistanceDP fileName");
 
         String fileName = args[0];
